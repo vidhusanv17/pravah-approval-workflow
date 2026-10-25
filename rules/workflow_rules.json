@@ -1,0 +1,232 @@
+{
+  "version": "APH-2026-27.v1",
+  "description": "Configurable stage pipeline, SLAs, routing and escalation rules. Edit via the Admin > Rules screen (versioned, audited).",
+  "stages": {
+    "SCRUTINY": {
+      "label": "Scrutiny",
+      "sla_days": 7,
+      "owner_role": "REGIONAL_OFFICER"
+    },
+    "RE_SCRUTINY": {
+      "label": "Re-scrutiny",
+      "sla_days": 5,
+      "owner_role": "REGIONAL_OFFICER"
+    },
+    "EVC": {
+      "label": "Expert Visit Committee",
+      "sla_days": 15,
+      "owner_role": "EVC_MEMBER"
+    },
+    "SAC_SHC": {
+      "label": "SAC / SHC",
+      "sla_days": 10,
+      "owner_role": "BUREAU_OFFICER"
+    },
+    "APPROVAL": {
+      "label": "Approval & Letter",
+      "sla_days": 3,
+      "owner_role": "BUREAU_OFFICER"
+    }
+  },
+  "pipelines": {
+    "ONLY_SCRUTINY": [
+      "SCRUTINY",
+      "APPROVAL"
+    ],
+    "SCRUTINY_EVC": [
+      "SCRUTINY",
+      "EVC",
+      "APPROVAL"
+    ],
+    "EVC_SAC_SHC": [
+      "SCRUTINY",
+      "EVC",
+      "SAC_SHC",
+      "APPROVAL"
+    ],
+    "ONLY_EVC": [
+      "EVC",
+      "APPROVAL"
+    ]
+  },
+  "routing": [
+    {
+      "when": {
+        "category": "NEW_INSTITUTION"
+      },
+      "pipeline": "EVC_SAC_SHC",
+      "note": "New institution: Scrutiny + EVC + SAC/SHC"
+    },
+    {
+      "when": {
+        "category": "CHANGE_OF_SITE"
+      },
+      "pipeline": "ONLY_EVC",
+      "note": "Change of site: EVC of new premises"
+    },
+    {
+      "when": {
+        "category": "CLOSURE"
+      },
+      "pipeline": "ONLY_SCRUTINY",
+      "note": "Closure: documentary scrutiny"
+    },
+    {
+      "when": {
+        "category": "CHANGE_OF_NAME"
+      },
+      "pipeline": "ONLY_SCRUTINY",
+      "note": "Change of name: documentary scrutiny"
+    },
+    {
+      "when": {
+        "category": "EOA",
+        "change_type": "INCREASE_INTAKE"
+      },
+      "pipeline": "SCRUTINY_EVC",
+      "note": "Intake increase: infrastructure verification by EVC"
+    },
+    {
+      "when": {
+        "category": "EOA",
+        "change_type": "NEW_COURSE"
+      },
+      "pipeline": "SCRUTINY_EVC",
+      "note": "New course: EVC for labs/faculty"
+    },
+    {
+      "when": {
+        "category": "EOA"
+      },
+      "pipeline": "ONLY_SCRUTINY",
+      "note": "EoA without change: scrutiny only"
+    }
+  ],
+  "default_pipeline": "SCRUTINY_EVC",
+  "green_channel": {
+    "min_score": 85,
+    "sla_factor": 0.7,
+    "note": "Fast-track SLAs for consistently compliant institutions; statutory stages are never skipped"
+  },
+  "high_risk": {
+    "max_score": 60,
+    "sla_factor": 1,
+    "note": "Flagged for deeper scrutiny"
+  },
+  "escalation": {
+    "warn_days_before_sla": 2,
+    "levels": [
+      {
+        "after_overdue_days": 0,
+        "to_role": "REGIONAL_OFFICER",
+        "label": "L1 - Regional Officer"
+      },
+      {
+        "after_overdue_days": 3,
+        "to_role": "BUREAU_OFFICER",
+        "label": "L2 - Bureau Officer"
+      },
+      {
+        "after_overdue_days": 7,
+        "to_role": "MEMBER_SECRETARY",
+        "label": "L3 - Member Secretary"
+      }
+    ]
+  },
+  "evc": {
+    "schedule_within_days": 10,
+    "reminder_days_before": 3,
+    "min_members": 3,
+    "experts": [
+      {
+        "name": "Prof. S. Iyer",
+        "expertise": "Civil / Infrastructure",
+        "state": "Tamil Nadu"
+      },
+      {
+        "name": "Dr. K. Bhattacharya",
+        "expertise": "Computer Science",
+        "state": "West Bengal"
+      },
+      {
+        "name": "Prof. M. Deshmukh",
+        "expertise": "Mechanical",
+        "state": "Maharashtra"
+      },
+      {
+        "name": "Dr. P. Nair",
+        "expertise": "Pharmacy",
+        "state": "Kerala"
+      },
+      {
+        "name": "Prof. R. Agarwal",
+        "expertise": "Management",
+        "state": "Uttar Pradesh"
+      },
+      {
+        "name": "Dr. L. Reddy",
+        "expertise": "Electronics",
+        "state": "Telangana"
+      },
+      {
+        "name": "Prof. H. Joshi",
+        "expertise": "Architecture",
+        "state": "Gujarat"
+      },
+      {
+        "name": "Dr. A. Baruah",
+        "expertise": "Civil / Infrastructure",
+        "state": "Assam"
+      }
+    ]
+  },
+  "undertakings": {
+    "reminder_days_before": [
+      30,
+      15,
+      7,
+      1
+    ],
+    "escalate_after_overdue_days": 7
+  },
+  "documents": {
+    "expiry_alert_days_before": [
+      90,
+      60,
+      30,
+      7
+    ],
+    "escalate_after_expired_days": 15
+  },
+  "compliance_score": {
+    "expired_document": 15,
+    "overdue_undertaking": 8,
+    "return_cycle": 5,
+    "open_escalation": 5,
+    "document_reuse": 20,
+    "bands": {
+      "GREEN": 85,
+      "AMBER": 60
+    }
+  },
+  "notifications": {
+    "channels_by_severity": {
+      "INFO": [
+        "IN_APP",
+        "EMAIL"
+      ],
+      "WARNING": [
+        "IN_APP",
+        "EMAIL",
+        "WHATSAPP"
+      ],
+      "CRITICAL": [
+        "IN_APP",
+        "EMAIL",
+        "SMS",
+        "WHATSAPP"
+      ]
+    },
+    "digest_hour_ist": 9
+  }
+}
